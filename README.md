@@ -1,10 +1,13 @@
-# Digital Integration: Tornado & Operation Desert Storm (Revision 1.0e)
+# Digital Integration: Tornado & Operation Desert Storm Source Code (Revision 1.0e)
+
+<img width="320" height="200" alt="image" src="https://github.com/user-attachments/assets/3f75a06e-2dec-41d0-a8b4-22c4532310b3" />
+
 
 ## Project Overview & Accomplishment
 
 This repository contains the reconstructed, bit-exact assembly source code, data assets, build scripts, and MS-DOS toolchain for **Digital Integration's Tornado & Operation Desert Storm** (Revision 1.0e, CD-ROM release, 1994).
 
-Starting from the disassembled and leaked European floppy diskette v1.0a source code, the entire codebase was reverse-engineered, restructured, and updated to match the final CD-ROM release 1.0e. Through meticulous opcode analysis, relocation table alignment, and data segment reconstruction, this project achieves a **100.000000% byte-for-byte binary match (0 byte differences)** against the official release binaries for **both** simulation engines:
+Starting from the disassembled and leaked European floppy diskette v1.0a source code, the entire codebase was reverse-engineered, restructured, and updated to match the final CD-ROM release 1.0e. Through meticulous opcode analysis, relocation table alignment, and data segment reconstruction, this project achieves a **100% byte-for-byte binary match (0 byte differences)** against the official release binaries for **both** simulation engines:
 
 - **`FLIGHT.EXE` (European Theater Engine)**:
   - **Size**: 610,000 bytes
