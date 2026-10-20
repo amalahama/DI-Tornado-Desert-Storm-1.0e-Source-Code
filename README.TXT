@@ -7,7 +7,14 @@ Table of Contents
 -----------------
 1. Project Overview & 100% Binary Exact Recreation
 2. Build Environment & Automated Toolchain Setup
-3. How to Build & Verify (BUILDALL.BAT, BUILD_FL.BAT, BUILD_DS.BAT)
+3. How to Build from Scratch & Verify (Step-by-Step Guide)
+   3.1. Prerequisites & Toolchain Availability
+   3.2. Step 1: Clone the Repository
+   3.3. Step 2: (Optional) Clean Existing Binaries
+   3.4. Step 3: Launch & Configure DOSBox / MS-DOS
+   3.5. Step 4: Execute the Build (BUILDALL.BAT, BUILD_FL.BAT, BUILD_DS.BAT)
+   3.6. Step 5: Verify 100% Binary Match
+   3.7. Automated Headless DOSBox Execution
 4. Comprehensive Code Differences: Revision 1.0a (Floppy) vs Revision 1.0e (CD)
    4.1. Creative Voice Driver API Architecture & SoundBlaster Overhaul
    4.2. Rudder Pedals (/RP) & Fast Notebook Gameport Support
@@ -76,15 +83,84 @@ relies on the authentic toolchain used by DI engineers in 1993-1994:
 
 
 ==============================================================================
-3. HOW TO BUILD & VERIFY (BUILDALL.BAT, BUILD_FL.BAT, BUILD_DS.BAT)
+3. HOW TO BUILD FROM SCRATCH & VERIFY (STEP-BY-STEP GUIDE)
 ==============================================================================
-All builds should be executed in MS-DOS or DOSBox from the project root directory
-(e.g., C:\TORNADO or your mounted drive root):
+This walkthrough details the exact procedure to compile both FLIGHT.EXE and
+DESERT.EXE completely from scratch using the files in this repository.
+
+3.1. Prerequisites & Toolchain Availability
+-------------------------------------------
+- Platform / Emulation:
+  * DOSBox (v0.74-3, DOSBox-X, or DOSBox Staging) on Windows, macOS, or Linux.
+  * Alternatively: A physical retro PC or virtual machine running MS-DOS 5.0+
+    or MS-DOS 6.22 with at least 580 KB free conventional memory.
+- Compiler & Linker Toolchain:
+  * NO external downloads or installations are required! All authentic
+    compilers and utilities used by Digital Integration are bundled directly
+    in this repository:
+    - MASM611\BIN\ML.EXE     : Microsoft Macro Assembler Version 6.11
+    - MASM611\BIN\LINK.EXE   : Microsoft Segmented-Executable Linker v5.31.009
+    - MASM611\BIN\CHKSUM.EXE : 16-bit MZ header checksum utility
+    - MASM611\INCLUDE\       : Assembler macro and structure definitions
+
+3.2. Step 1: Clone the Repository
+---------------------------------
+Clone the repository to your host environment:
+
+    git clone https://github.com/amalahama/DI-Tornado-Desert-Storm-1.0e-Source-Code.git
+    cd DI-Tornado-Desert-Storm-1.0e-Source-Code
+
+3.3. Step 2: (Optional) Remove Pre-Compiled Binaries
+----------------------------------------------------
+If you want to guarantee a build strictly from zero source without pre-existing
+executables, delete the binary targets in TORNADO\FLIGHT\:
+
+    del TORNADO\FLIGHT\FLIGHT.EXE
+    del TORNADO\FLIGHT\DESERT.EXE
+
+3.4. Step 3: Launch & Configure DOSBox / MS-DOS
+-----------------------------------------------
+CRITICAL MOUNTING INSTRUCTION:
+You MUST mount the repository directory as the ROOT of drive C:
+  (e.g., `mount c "C:\path\to\DI-Tornado-Desert-Storm-1.0e-Source-Code"`).
+
+Digital Integration's original batch files and link scripts use root-relative
+paths (e.g., `cd \lib8086`, `cd \visual`, `cd \tornado`, and linker definitions
+such as `\lib8086\com_drvr+` and `\visual\palettes+`). If the repository is
+mounted as a subfolder, the tools and scripts will fail to find the files.
+
+Configure your environment at the DOS prompt (or in the [autoexec] section of
+your dosbox.conf):
+
+    mount c "C:\path\to\DI-Tornado-Desert-Storm-1.0e-Source-Code"
+    c:
+    cd \
+    path c:\masm611\bin;c:\tools\misc;%PATH%
+    set include=c:\masm611\include
+
+Recommended DOSBox setting:
+In `dosbox.conf`, set `cycles=max` to allow assembly of all ~237,000 lines of
+assembly code in under 30 seconds.
+
+3.5. Step 4: Execute the Build
+------------------------------
+From the root of drive C:\, execute the desired build command:
 
 - Automated Full Build (Both Engines):
     BUILDALL.BAT
-  Sequentially compiles and links FLIGHT.EXE and DESERT.EXE, applies the header
-  checksums, and places the binaries in TORNADO\FLIGHT\.
+  This sequentially builds both executables from scratch:
+  1. Calls BUILD_FL.BAT:
+     - Assembles \LIB8086 modules (PAL.BAT)
+     - Assembles \VISUAL European modules (PAL.BAT)
+     - Assembles \TORNADO European modules (PAL.BAT)
+     - Links \TORNADO\MAIN.LNK via LINK.EXE (L.BAT)
+     - Runs CHKSUM.EXE on TORNADO\FLIGHT\FLIGHT.EXE (stamps 0x030E)
+  2. Calls BUILD_DS.BAT:
+     - Reuses \LIB8086 object modules
+     - Assembles \VISUAL Desert Storm modules with /DDESERT (PAL_DS.BAT)
+     - Assembles \TORNADO Desert Storm modules with /DDESERT (PAL_DS.BAT)
+     - Links \TORNADO\MAIN_DS.LNK via LINK.EXE (L_DS.BAT)
+     - Runs CHKSUM.EXE on TORNADO\FLIGHT\DESERT.EXE (stamps 0xFDC9)
 
 - European Theater Engine Only:
     BUILD_FL.BAT
@@ -96,13 +172,44 @@ All builds should be executed in MS-DOS or DOSBox from the project root director
   Assembles LIB8086, VISUAL (/DDESERT), and TORNADO (/DDESERT), links
   MAIN_DS.LNK, and stamps DESERT.EXE.
 
-Directory-level scripts:
+Directory-level scripts (for iterative development on specific modules):
   - VISUAL\PAL.BAT    : Assemble European visual modules
   - VISUAL\PAL_DS.BAT : Assemble Desert Storm visual modules (/DDESERT)
   - TORNADO\PAL.BAT   : Assemble European flight/avionics modules
   - TORNADO\PAL_DS.BAT: Assemble Desert Storm flight/avionics modules (/DDESERT)
   - TORNADO\L.BAT     : Link FLIGHT.EXE and run CHKSUM.EXE
   - TORNADO\L_DS.BAT  : Link DESERT.EXE and run CHKSUM.EXE
+
+3.6. Step 5: Verify 100% Binary Exact Match
+-------------------------------------------
+Upon completion, the newly compiled executables are placed in TORNADO\FLIGHT\:
+  - TORNADO\FLIGHT\FLIGHT.EXE (610,000 bytes)
+  - TORNADO\FLIGHT\DESERT.EXE (612,832 bytes)
+
+You can verify their cryptographic hashes against the official CD-ROM 1.0e
+release using PowerShell or Linux terminal:
+
+  PowerShell:
+    Get-FileHash TORNADO\FLIGHT\FLIGHT.EXE -Algorithm SHA256
+    Get-FileHash TORNADO\FLIGHT\DESERT.EXE -Algorithm SHA256
+
+  Expected SHA-256 Hashes:
+    FLIGHT.EXE : 4a6c6dc43a140d7486737a222a4e15ebc35beb9930965e20ad4c9c804144a185
+    DESERT.EXE : da57fac79f83ffdcbbdea9c88623a15d9e258c291ce6b60dd314ebc3c364086f
+
+  Expected MD5 Hashes:
+    FLIGHT.EXE : 140a552910971e6e6ac3e6a976dd823a
+    DESERT.EXE : f6ceb08234dd1fa4759d1f39b564f52e
+
+A comparison against the official CD binaries will report 0 byte differences
+(100.000000% exact match).
+
+3.7. Automated Headless DOSBox Execution
+----------------------------------------
+To run the entire compilation non-interactively from a Windows PowerShell or
+Command Prompt batch script:
+
+  dosbox.exe -c "mount c C:\path\to\repo" -c "c:" -c "path c:\masm611\bin;c:\tools\misc;Z:\" -c "set include=c:\masm611\include" -c "call buildall.bat" -c "exit" -noconsole
 
 
 ==============================================================================
