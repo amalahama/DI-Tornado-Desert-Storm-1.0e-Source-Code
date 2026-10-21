@@ -43,12 +43,13 @@ Table of Contents
 2. Build Environment & Automated Toolchain Setup
 3. How to Build from Scratch & Verify (Step-by-Step Guide)
    3.1. Prerequisites & Toolchain Availability
-   3.2. Step 1: Clone the Repository
-   3.3. Step 2: (Optional) Clean Existing Binaries
-   3.4. Step 3: Launch & Configure DOSBox / MS-DOS
-   3.5. Step 4: Execute the Build (BUILDALL.BAT, BUILD_FL.BAT, BUILD_DS.BAT)
-   3.6. Step 5: Verify 100% Binary Match
-   3.7. Automated Headless DOSBox Execution
+   3.2. Step 1: Clone or Download the Repository
+   3.3. Line Ending Requirements (CRLF vs. LF) & PowerShell Fix for Direct ZIPs
+   3.4. Step 2: (Optional) Clean Existing Binaries
+   3.5. Step 3: Launch & Configure DOSBox / MS-DOS
+   3.6. Step 4: Execute the Build (BUILDALL.BAT, BUILD_FL.BAT, BUILD_DS.BAT)
+   3.7. Step 5: Verify 100% Binary Match
+   3.8. Automated Headless DOSBox Execution
 4. Comprehensive Code Differences: Revision 1.0a (Floppy) vs Revision 1.0e (CD)
    4.1. Creative Voice Driver API Architecture & SoundBlaster Overhaul
    4.2. Rudder Pedals (/RP) & Fast Notebook Gameport Support
@@ -137,14 +138,34 @@ DESERT.EXE completely from scratch using the files in this repository.
     - MASM611\BIN\CHKSUM.EXE : 16-bit MZ header checksum utility
     - MASM611\INCLUDE\       : Assembler macro and structure definitions
 
-3.2. Step 1: Clone the Repository
----------------------------------
+3.2. Step 1: Clone or Download the Repository
+----------------------------------------------
 Clone the repository to your host environment:
 
     git clone https://github.com/amalahama/DI-Tornado-Desert-Storm-1.0e-Source-Code.git
     cd DI-Tornado-Desert-Storm-1.0e-Source-Code
 
-3.3. Step 2: (Optional) Remove Pre-Compiled Binaries
+Alternatively, you can download the repository as a ZIP archive directly from
+GitHub using the green "Code -> Download ZIP" button.
+
+3.3. Line Ending Requirements (CRLF vs. LF) & PowerShell Fix for Direct ZIPs
+----------------------------------------------------------------------------
+16-bit MS-DOS assemblers (MASM 6.11 / ML.EXE) strictly require MS-DOS CRLF (\r\n)
+line endings. If source files are formatted with Unix LF (\n), MASM 6.11 fails
+during assembly (e.g., "TAB.ASM(2701): error A2039: text literal too long" /
+"line too long") because its internal line reader does not detect line boundaries.
+
+This repository includes a `.gitattributes` file that forces Git to export and
+package all text files with CRLF line endings automatically.
+
+However, if you downloaded the code as a direct ZIP archive from GitHub before
+this fix, or if your local environment converted files to Unix LF, you can
+instantly restore CRLF line endings for all source files by running this
+one-line PowerShell command in the project root directory:
+
+    Get-ChildItem -Recurse -Include *.ASM,*.INC,*.BAT,*.LNK,*.TXT,*.DOC,*.BAS,*.BI | ForEach-Object { (Get-Content $_.FullName -Raw).Replace("`r`n","`n").Replace("`n","`r`n") | Set-Content $_.FullName -NoNewline }
+
+3.4. Step 2: (Optional) Remove Pre-Compiled Binaries
 ----------------------------------------------------
 If you want to guarantee a build strictly from zero source without pre-existing
 executables, delete the binary targets in TORNADO\FLIGHT\:
@@ -152,7 +173,7 @@ executables, delete the binary targets in TORNADO\FLIGHT\:
     del TORNADO\FLIGHT\FLIGHT.EXE
     del TORNADO\FLIGHT\DESERT.EXE
 
-3.4. Step 3: Launch & Configure DOSBox / MS-DOS
+3.5. Step 3: Launch & Configure DOSBox / MS-DOS
 -----------------------------------------------
 CRITICAL MOUNTING INSTRUCTION:
 You MUST mount the repository directory as the ROOT of drive C:
@@ -176,7 +197,7 @@ Recommended DOSBox setting:
 In `dosbox.conf`, set `cycles=max` to allow assembly of all ~237,000 lines of
 assembly code in under 30 seconds.
 
-3.5. Step 4: Execute the Build
+3.6. Step 4: Execute the Build
 ------------------------------
 From the root of drive C:\, execute the desired build command:
 
@@ -214,7 +235,7 @@ Directory-level scripts (for iterative development on specific modules):
   - TORNADO\L.BAT     : Link FLIGHT.EXE and run CHKSUM.EXE
   - TORNADO\L_DS.BAT  : Link DESERT.EXE and run CHKSUM.EXE
 
-3.6. Step 5: Verify 100% Binary Exact Match
+3.7. Step 5: Verify 100% Binary Exact Match
 -------------------------------------------
 Upon completion, the newly compiled executables are placed in TORNADO\FLIGHT\:
   - TORNADO\FLIGHT\FLIGHT.EXE (610,000 bytes)
@@ -238,7 +259,7 @@ release using PowerShell or Linux terminal:
 A comparison against the official CD binaries will report 0 byte differences
 (100.000000% exact match).
 
-3.7. Automated Headless DOSBox Execution
+3.8. Automated Headless DOSBox Execution
 ----------------------------------------
 To run the entire compilation non-interactively from a Windows PowerShell or
 Command Prompt batch script:

@@ -1,0 +1,46 @@
+# Enforce MS-DOS CRLF line endings for all text/source files
+* text=auto eol=crlf
+
+# Assembly source code, includes, link scripts, batch files, and documentation
+*.asm text eol=crlf
+*.inc text eol=crlf
+*.bat text eol=crlf
+*.lnk text eol=crlf
+*.txt text eol=crlf
+*.doc text eol=crlf
+*.bas text eol=crlf
+*.bi  text eol=crlf
+*.gfa text eol=crlf
+*.map text eol=crlf
+*.md  text eol=crlf
+
+# Binary formats (prevent corruption or line ending conversion)
+*.exe binary
+*.com binary
+*.bin binary
+*.obj binary
+*.lib binary
+*.dll binary
+*.sys binary
+*.lbm binary
+*.rgb binary
+*.ss  binary
+*.qs  binary
+*.pt2 binary
+*.bt2 binary
+*.c56 binary
+*.c72 binary
+*.m8  binary
+*.m12 binary
+*.m18 binary
+*.m24 binary
+*.m36 binary
+*.m48 binary
+*.m56 binary
+*.m72 binary
+*.sym binary
+*.hlp binary
+*.pif binary
+*.new binary
+*.dfi binary
+*.psf binary
